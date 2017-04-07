@@ -10,6 +10,8 @@
     :copyright: (c) 2012 by Fireteam Ltd.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import print_function
+
 import os
 import re
 import sys
@@ -47,7 +49,7 @@ def update_activation_script(script_filename, new_path):
             changed = True
 
     if changed:
-        print 'A %s' % script_filename
+        print('A %s' % script_filename)
         with open(script_filename, 'w') as f:
             f.writelines(lines)
 
@@ -75,7 +77,7 @@ def update_script(script_filename, new_path):
 
     args[0] = new_bin
     lines[0] = '#!%s\n' % ' '.join(args)
-    print 'S %s' % script_filename
+    print('S %s' % script_filename)
     with open(script_filename, 'w') as f:
         f.writelines(lines)
 
@@ -103,7 +105,6 @@ def update_pyc(filename, new_path):
                         code.co_freevars, code.co_cellvars)
 
     def _process(code):
-        new_filename = new_path
         consts = []
         for const in code.co_consts:
             if type(const) is CodeType:
@@ -116,7 +117,7 @@ def update_pyc(filename, new_path):
     new_code = _process(code)
 
     if new_code is not code:
-        print 'B %s' % filename
+        print('B %s' % filename)
         with open(filename, 'wb') as f:
             f.write(magic)
             marshal.dump(new_code, f)
@@ -124,8 +125,6 @@ def update_pyc(filename, new_path):
 
 def update_pycs(lib_dir, new_path, lib_name):
     """Walks over all pyc files and updates their paths."""
-    files = []
-
     def get_new_path(filename):
         filename = os.path.normpath(filename)
         if filename.startswith(lib_dir.rstrip('/') + '/'):
@@ -155,7 +154,7 @@ def update_local(base, new_path):
         if os.path.islink(filename) and os.readlink(filename) != target:
             os.remove(filename)
             os.symlink('../%s' % folder, filename)
-            print 'L %s' % filename
+            print('L %s' % filename)
 
 
 def update_paths(base, new_path):
@@ -163,7 +162,7 @@ def update_paths(base, new_path):
     if new_path == 'auto':
         new_path = os.path.abspath(base)
     if not os.path.isabs(new_path):
-        print 'error: %s is not an absolute path' % new_path
+        print('error: %s is not an absolute path' % new_path)
         return False
 
     bin_dir = os.path.join(base, 'bin')
@@ -180,7 +179,7 @@ def update_paths(base, new_path):
 
     if lib_dir is None or not os.path.isdir(bin_dir) \
        or not os.path.isfile(os.path.join(bin_dir, 'python')):
-        print 'error: %s does not refer to a python installation' % base
+        print('error: %s does not refer to a python installation' % base)
         return False
 
     update_scripts(bin_dir, new_path)
@@ -194,7 +193,7 @@ def reinitialize_virtualenv(path):
     """Re-initializes a virtualenv."""
     lib_dir = os.path.join(path, 'lib')
     if not os.path.isdir(lib_dir):
-        print 'error: %s is not a virtualenv bin folder' % path
+        print('error: %s is not a virtualenv bin folder' % path)
         return False
 
     py_ver = None
@@ -204,15 +203,15 @@ def reinitialize_virtualenv(path):
             break
 
     if py_ver is None:
-        print 'error: could not detect python version of virtualenv %s' % path
+        print('error: could not detect python version of virtualenv %s' % path)
         return False
 
     sys_py_executable = subprocess.Popen(['which', py_ver],
         stdout=subprocess.PIPE).communicate()[0].strip()
 
     if not sys_py_executable:
-        print 'error: could not find system version for expected python ' \
-            'version %s' % py_ver
+        print('error: could not find system version for expected python '
+              'version %s' % py_ver)
         return False
 
     lib_dir = os.path.join(path, 'lib', py_ver)
